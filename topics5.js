@@ -1,0 +1,106 @@
+"use strict";
+/* ===== Additional problem types for every topic ===== */
+const addGens=(id,...g)=>TOPIC[id].gens.push(...g);
+const SOLVE=L('Solve the equation.','Теңдеуді шешіңіз.','Решите уравнение.'),CALC=L('Calculate.','Есептеңіз.','Вычислите.');
+const sgnS=v=>v<0?' - '+(-v):' + '+v;
+
+/* T01 Real numbers */
+addGens('t01',
+ (lv,r)=>{const q=pick(r,lv===1?[2,4,5,8,10,3,6,9]:[20,25,40,12,15,30,7,11,16,24,35,45]);let p;do p=ri(r,1,q*2);while(gcd(p,q)!==1);let m=q;while(m%2===0)m/=2;while(m%5===0)m/=5;const fin=m===1;
+  return{o:'8.1.1.1',k:'mc',p:L('Is this fraction equal to a finite decimal?','Бұл бөлшек шектеулі ондық бөлшекке тең бе?','Равна ли эта дробь конечной десятичной дроби?'),eq:'fr{'+p+'}{'+q+'}',opts:YN(),a:fin?0:1,noShuffle:true,
+   h:[L('Reduce the fraction and factor the denominator.','Бөлшекті қысқартып, бөлімін жай көбейткіштерге жіктеңіз.','Сократите дробь и разложите знаменатель на простые множители.'),L('The decimal is finite only if the denominator has no prime factors other than 2 and 5.','Бөлімде 2 мен 5-тен басқа жай көбейткіш болмаса ғана, ондық бөлшек шектеулі.','Дробь конечна, только если в знаменателе нет простых множителей, кроме 2 и 5.')],ex:()=>M('fr{'+p+'}{'+q+'} = '+decExp(p,q).str)}},
+ (lv,r)=>{let n;do n=ri(r,lv===1?2:10,lv===1?30:99);while(isSq(n));const s=Math.sqrt(n);const lo=Math.floor(s*10)/10,hi=Math.round((lo+.1)*10)/10;const qd=ri(r,3,9);let pp=Math.round(s*qd);let fv=pp/qd;while([lo,hi,s].some(v=>Math.abs(v-fv)<.004)){pp++;fv=pp/qd}
+  const vals=[s,lo,hi,fv],opts=['√{'+n+'}',raw(lo),raw(hi),'fr{'+pp+'}{'+qd+'}'];const mx=vals.indexOf(Math.max(...vals));
+  return{o:'8.1.1.1',k:'mc',p:L('Which number is the largest?','Қай сан ең үлкен?','Какое число наибольшее?'),opts,a:mx,h:[L('Write every number as a decimal with 3 digits after the point.','Әр санды үтірден кейін 3 цифрмен ондық бөлшек түрінде жазыңыз.','Запишите каждое число десятичной дробью с 3 знаками после запятой.'),()=>M('√{'+n+'} ≈ '+raw(Math.round(s*1000)/1000))],ex:()=>vals.map((v,i)=>M(opts[i]+' ≈ '+raw(Math.round(v*1000)/1000))).join(';  ')}});
+
+/* T02 Square root */
+addGens('t02',
+ (lv,r)=>{let a,s;if(lv===1){s=ri(r,1,12);a=String(s*s)}else if(lv===2){s=pick(r,[.1,.2,.3,.4,.5,.6,.7,.9,1.2,1.5]);a=raw(Math.round(s*s*100)/100)}else{const p=ri(r,1,7),q=ri(r,2,9);s=p/q;a='fr{'+p*p+'}{'+q*q+'}'}
+  return{o:'8.1.1.2',k:'nums',p:SOLVE,eq:'x^2 = '+a,ans:[s,-s],lab:'x',h:[L('x² = a has two roots when a > 0: x = ±√a.','a > 0 болса, x² = a теңдеуінің екі түбірі бар: x = ±√a.','При a > 0 уравнение x² = a имеет два корня: x = ±√a.')],ex:()=>M('x = ±√{'+a+'} = ±'+nstr(s))}},
+ (lv,r)=>{const a=ri(r,2,15),b=ri(r,2,12),k=ri(r,2,5);let e,v;if(lv===1){e='(√{'+a+'})^2';v=a}else if(lv===2){e='(√{'+a+'})^2 + √{(-'+b+')^2}';v=a+b}else{e='('+k+'√{'+a+'})^2 - √{'+b*b+'}';v=k*k*a-b}
+  return{o:'8.1.2.1',k:'num',p:CALC,eq:e,ans:v,h:[L('(√a)² = a for a ≥ 0, and √(b²) = |b|.','a ≥ 0 үшін (√a)² = a, ал √(b²) = |b|.','(√a)² = a при a ≥ 0, а √(b²) = |b|.'),L('(k√a)² = k²·a.','(k√a)² = k²·a.','(k√a)² = k²·a.')],ex:()=>M(e+' = '+v)}});
+
+/* T03 Transforming expressions */
+addGens('t03',
+ (lv,r)=>{const a=pick(r,[2,3,5,6,7,10,11,13]);let b;do b=pick(r,[2,3,5,6,7,10]);while(b===a);let e,v;if(lv<3){e='(√{'+a+'} + √{'+b+'})(√{'+a+'} - √{'+b+'})';v=a-b}else{const k=ri(r,2,4),m=ri(r,1,6);e='('+k+'√{'+a+'} - '+m+')('+k+'√{'+a+'} + '+m+')';v=k*k*a-m*m}
+  return{o:'8.1.2.5',k:'num',p:CALC,eq:e,ans:v,h:[L('Use the difference of squares: (p − q)(p + q) = p² − q².','Квадраттар айырымын қолданыңыз: (p − q)(p + q) = p² − q².','Используйте разность квадратов: (p − q)(p + q) = p² − q².')],ex:()=>M(e+' = '+v)}},
+ (lv,r)=>{const m=pick(r,[2,3,5,6,7]),k=ri(r,1,lv===1?3:6)*(lv===3&&r()<.5?-1:1);return{o:'8.1.2.5',k:'multi',p:L('Expand: (√m + k)² = p + q√m. Find p and q.','Жақшаны ашыңыз: (√m + k)² = p + q√m. p мен q-ды табыңыз.','Раскройте скобки: (√m + k)² = p + q√m. Найдите p и q.'),eq:'(√{'+m+'}'+sgnS(k)+')^2',fields:[['p',m+k*k],['q',2*k]],
+  h:[L('(x + y)² = x² + 2xy + y².','(x + y)² = x² + 2xy + y².','(x + y)² = x² + 2xy + y².'),()=>M('(√{'+m+'})^2 = '+m)],ex:()=>M('(√{'+m+'}'+sgnS(k)+')^2 = '+m+' + '+(2*k)+'√{'+m+'} + '+k*k+' = '+(m+k*k)+(k<0?' - '+(-2*k):' + '+2*k)+'√{'+m+'}')}});
+
+/* T04 y = √x */
+addGens('t04',
+ (lv,r)=>{const a=nz(r,-6,6);const rev=lv===3&&r()<.6;const e=rev?'y = √{'+a+' - x}':'y = √{x'+sgnS(-a)+'}';const good=rev?'x ≤ '+a:'x ≥ '+a;const opts=rev?['x ≤ '+a,'x ≥ '+a,'x ≤ '+(-a),'x < '+a]:['x ≥ '+a,'x ≥ '+(-a),'x > '+a,'x ≤ '+a];
+  return{o:'8.4.1.1',k:'mc',p:L('Find the domain of the function.','Функцияның анықталу облысын табыңыз.','Найдите область определения функции.'),eq:e,opts,a:0,h:[L('The expression under the root must be ≥ 0.','Түбір астындағы өрнек ≥ 0 болуы керек.','Подкоренное выражение должно быть ≥ 0.')],ex:()=>M(good)}},
+ (lv,r)=>{const k=ri(r,0,8),c=nz(r,2,5),d=nz(r,-6,6);let e,v;if(lv===1){e='y = '+c+'√{x}';v=c*k}else if(lv===2){e='y = √{x}'+sgnS(d);v=k+d}else{e='y = -'+c+'√{x}'+sgnS(d);v=-c*k+d}
+  return{o:'8.4.1.4',k:'num',p:L(`Find y when x = ${k*k}.`,`x = ${k*k} болғанда y-ті табыңыз.`,`Найдите y при x = ${k*k}.`),eq:e,ans:v,h:[()=>M('√{'+k*k+'} = '+k)],ex:()=>M('y = '+v)}});
+
+/* T05 Quadratic equation */
+addGens('t05',
+ (lv,r)=>{const a=nz(r,-4,5),b=nz(r,-7,7),c=nz(r,-9,9);const o=[[a,b,c],[a,c,b],[a,-b,c],[c,b,a]].filter((x,i,arr)=>arr.findIndex(y=>y.join()===x.join())===i);while(o.length<3)o.push([a,b,c+o.length]);
+  return{o:'8.2.2.1',k:'mc',p:L(`Which quadratic equation has a = ${a}, b = ${b}, c = ${c}?`,`Қай квадрат теңдеуде a = ${a}, b = ${b}, c = ${c}?`,`У какого квадратного уравнения a = ${a}, b = ${b}, c = ${c}?`),opts:o.map(x=>ts([[x[0],2],[x[1],1],[x[2],0]])+' = 0'),a:0,h:[L('a stands before x², b before x, c is the free term.','a — x²-тің алдында, b — x-тің алдында, c — бос мүше.','a — перед x², b — перед x, c — свободный член.')],ex:()=>M(ts([[a,2],[b,1],[c,0]])+' = 0')}},
+ (lv,r)=>{const m=nz(r,-7,7),b=nz(r,-6,6),c=nz(r,-9,9);if(lv<3)return{o:'8.2.2.1',k:'num',p:L('For which value of k is this equation NOT quadratic?','k-ның қандай мәнінде бұл теңдеу квадрат болмайды?','При каком k это уравнение НЕ является квадратным?'),eq:'(k'+sgnS(-m)+')x^2'+sgnS(b).replace(/ (\d+)$/,' $1x')+sgnS(c)+' = 0',ans:m,lab:'k',h:[L('A quadratic equation needs a ≠ 0. Here a = k − '+m+'.','Квадрат теңдеуде a ≠ 0 болуы керек. Мұнда a = k − '+m+'.','В квадратном уравнении a ≠ 0. Здесь a = k − '+m+'.')],ex:()=>M('k'+sgnS(-m)+' = 0 ⇒ k = '+m)};
+  const n=ri(r,1,5);return{o:'8.2.2.1',k:'nums',p:L('For which values of k is this equation NOT quadratic?','k-ның қандай мәндерінде бұл теңдеу квадрат болмайды?','При каких k это уравнение НЕ является квадратным?'),eq:'(k^2 - '+n*n+')x^2 + '+Math.abs(b)+'x'+sgnS(c)+' = 0',ans:[n,-n],lab:'k',h:[L('Set the leading coefficient equal to 0.','Бас коэффициентті 0-ге теңестіріңіз.','Приравняйте старший коэффициент к 0.')],ex:()=>M('k^2 = '+n*n+' ⇒ k = ±'+n)}});
+
+/* T06 Solving */
+addGens('t06',
+ (lv,r)=>{if(lv===1){const k=ri(r,1,12);return{o:'8.2.2.3',k:'nums',p:SOLVE,eq:'x^2 - '+k*k+' = 0',ans:[k,-k],lab:'x',h:[L('Move the number: x² = c.','Санды көшіріңіз: x² = c.','Перенесите число: x² = c.')],ex:()=>M('x = ±'+k)}}
+  if(lv===2){const a=nz(r,-4,4),q=nz(r,-6,6);return{o:'8.2.2.3',k:'nums',p:SOLVE,eq:ts([[a,2],[-a*q,1]])+' = 0',ans:[0,q],lab:'x',h:[L('Take x out of the brackets: x(ax + b) = 0.','x-ті жақшаның сыртына шығарыңыз: x(ax + b) = 0.','Вынесите x за скобки: x(ax + b) = 0.')],ex:()=>M('x('+ts([[a,1],[-a*q,0]])+') = 0 ⇒ x = 0;  x = '+q)}}
+  const a=ri(r,2,5),k=ri(r,1,6);return{o:'8.2.2.3',k:'nums',p:SOLVE,eq:a+'x^2 - '+a*k*k+' = 0',ans:[k,-k],lab:'x',h:[L('Divide by a first.','Алдымен a-ға бөліңіз.','Сначала разделите на a.')],ex:()=>M('x^2 = '+k*k+' ⇒ x = ±'+k)}},
+ (lv,r)=>{const k=nz(r,-7,7);if(lv<3)return{o:'8.2.2.3',k:'num',p:L('The equation has exactly one root. Find c.','Теңдеудің тек бір түбірі бар. c-ны табыңыз.','Уравнение имеет ровно один корень. Найдите c.'),eq:ts([[1,2],[2*k,1]])+' + c = 0',ans:k*k,lab:'c',h:[L('One root means D = 0.','Бір түбір — D = 0 дегенді білдіреді.','Один корень означает D = 0.')],ex:()=>M('D = '+4*k*k+' - 4c = 0 ⇒ c = '+k*k)};
+  const m=ri(r,2,9);return{o:'8.2.2.3',k:'num',p:L('The equation has exactly one root. Find p > 0.','Теңдеудің тек бір түбірі бар. p > 0 табыңыз.','Уравнение имеет ровно один корень. Найдите p > 0.'),eq:'x^2 + px + '+m*m+' = 0',ans:2*m,lab:'p',h:[L('D = p² − 4·'+m*m+' = 0.','D = p² − 4·'+m*m+' = 0.','D = p² − 4·'+m*m+' = 0.')],ex:()=>M('p^2 = '+4*m*m+' ⇒ p = '+2*m)}});
+
+/* T07 Square trinomial */
+addGens('t07',
+ (lv,r)=>{const b=lv===1?2*nz(r,-5,5):nz(r,-9,9),c=nz(r,-9,12);const q=c-b*b/4;return{o:'8.2.1.2',k:'num',p:L('Complete the square and find the smallest value of the trinomial.','Толық квадратты бөліп, үшмүшенің ең кіші мәнін табыңыз.','Выделите полный квадрат и найдите наименьшее значение трёхчлена.'),eq:ts([[1,2],[b,1],[c,0]]),ans:q,h:[L('x² + bx + c = (x + b/2)² + c − b²/4.','x² + bx + c = (x + b/2)² + c − b²/4.','x² + bx + c = (x + b/2)² + c − b²/4.'),L('A square is never negative, so the smallest value is c − b²/4.','Квадрат ешқашан теріс емес, сондықтан ең кіші мән c − b²/4.','Квадрат неотрицателен, значит наименьшее значение c − b²/4.')],ex:()=>M('(x'+sgnS(b/2).replace(/(\d)$/,'$1')+')^2 '+(q<0?'- '+nstr(-q):'+ '+nstr(q)))+' ⇒ '+M('min = '+nstr(q))}},
+ (lv,r)=>{if(lv<3){const b=2*nz(r,-8,8);return{o:'8.2.1.2',k:'num',p:L('Find c so that the trinomial is a perfect square.','Үшмүше толық квадрат болатындай c-ны табыңыз.','Найдите c, при котором трёхчлен — полный квадрат.'),eq:ts([[1,2],[b,1]])+' + c',ans:b*b/4,lab:'c',h:[L('(x + k)² = x² + 2kx + k²: c = (b/2)².','(x + k)² = x² + 2kx + k²: c = (b/2)².','(x + k)² = x² + 2kx + k²: c = (b/2)².')],ex:()=>M('c = ('+b/2+')^2 = '+b*b/4)}}
+  const m=ri(r,2,5),k=ri(r,1,6);return{o:'8.2.1.2',k:'num',p:L('Find b > 0 so that the trinomial is a perfect square.','Үшмүше толық квадрат болатындай b > 0 табыңыз.','Найдите b > 0, при котором трёхчлен — полный квадрат.'),eq:m*m+'x^2 + bx + '+k*k,ans:2*m*k,lab:'b',h:[()=>M('('+m+'x + '+k+')^2 = ?')],ex:()=>M('('+m+'x + '+k+')^2 = '+m*m+'x^2 + '+2*m*k+'x + '+k*k)}});
+
+/* T08 Reducible equations */
+addGens('t08',
+ (lv,r)=>{const a=ri(r,1,lv===1?3:6),t1=-ri(r,1,9);const t2=a*a;return{o:'8.2.2.5',k:'nums',p:L('Solve the biquadratic equation.','Биквадрат теңдеуді шешіңіз.','Решите биквадратное уравнение.'),eq:ts([[1,4],[-(t1+t2),2],[t1*t2,0]])+' = 0',ans:[a,-a],lab:'x',h:[L('t = x²; one of the values of t is negative.','t = x²; t-ның бір мәні теріс.','t = x²; одно из значений t отрицательно.')],ex:()=>M('t = '+t1+' (∅);  t = '+t2+' ⇒ x = ±'+a)}},
+ (lv,r)=>{const p=nz(r,-6,6);let q;do q=nz(r,-6,6);while(q===p);const P=p*q,Sm=p+q;return{o:'8.2.2.6',k:'nums',p:L('Solve the equation (x ≠ 0).','Теңдеуді шешіңіз (x ≠ 0).','Решите уравнение (x ≠ 0).'),eq:'x'+(P<0?' - fr{'+(-P)+'}{x}':' + fr{'+P+'}{x}')+' = '+Sm,ans:[p,q],lab:'x',h:[L('Multiply both sides by x.','Екі жағын да x-ке көбейтіңіз.','Умножьте обе части на x.'),()=>M(ts([[1,2],[-Sm,1],[P,0]])+' = 0')],ex:()=>M('x = '+p+';  x = '+q)}});
+
+/* T09 Word problems */
+const PIPES=[[6,12,4],[3,6,2],[10,15,6],[4,12,3],[12,24,8],[20,30,12],[6,3,2]].map(x=>x[0]<x[1]?x:[x[1],x[0],x[2]]);
+const TRI=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[9,12,15],[7,24,25],[20,21,29],[12,16,20]];
+addGens('t09',
+ (lv,r)=>{const[a,b,T]=pick(r,PIPES);return{o:'8.4.2.2',k:'num',p:L(`Two pipes together fill a tank in ${T} h. The first pipe alone needs ${b-a} h less than the second. How many hours does the first pipe need alone?`,`Екі құбыр бірге резервуарды ${T} сағатта толтырады. Бірінші құбырға жалғыз өзі екіншісіне қарағанда ${b-a} сағат аз уақыт керек. Бірінші құбыр жалғыз неше сағатта толтырады?`,`Две трубы вместе наполняют бак за ${T} ч. Первой трубе одной нужно на ${b-a} ч меньше, чем второй. За сколько часов первая труба наполнит бак одна?`),ans:a,unit:L('Unit: h.','Өлшем бірлігі: сағ.','Единицы: ч.'),
+  h:[L('Rate = 1/time. Let the first pipe need x h.','Өнімділік = 1/уақыт. Бірінші құбырға x сағ керек болсын.','Производительность = 1/время. Пусть первой трубе нужно x ч.'),()=>M('fr{1}{x} + fr{1}{x + '+(b-a)+'} = fr{1}{'+T+'}')],ex:()=>M('fr{1}{'+a+'} + fr{1}{'+b+'} = fr{1}{'+T+'}')+' ⇒ x = '+a}},
+ (lv,r)=>{const[a,b,c]=pick(r,TRI);return{o:'8.4.2.1',k:'num',p:L(`One leg of a right triangle is ${b-a} cm longer than the other. The hypotenuse is ${c} cm. Find the shorter leg.`,`Тікбұрышты үшбұрыштың бір катеті екіншісінен ${b-a} см ұзын. Гипотенузасы ${c} см. Қысқа катетті табыңыз.`,`Один катет прямоугольного треугольника на ${b-a} см длиннее другого. Гипотенуза ${c} см. Найдите меньший катет.`),ans:a,unit:L('Unit: cm.','Өлшем бірлігі: см.','Единицы: см.'),h:[L('Pythagoras: x² + (x + d)² = c².','Пифагор теоремасы: x² + (x + d)² = c².','Теорема Пифагора: x² + (x + d)² = c².'),()=>M('x^2 + (x + '+(b-a)+')^2 = '+c*c)],ex:()=>M(a+'^2 + '+b+'^2 = '+c+'^2')+' ⇒ x = '+a}});
+
+/* T10 Quadratic function */
+addGens('t10',
+ (lv,r)=>{const p=nz(r,-6,6);let q;do q=nz(r,-6,6);while(q===p);const a=lv===1?1:pick(r,[1,-1,2]);return{o:'8.4.1.4',k:'nums',p:L('Find the zeros of the function.','Функцияның нөлдерін табыңыз.','Найдите нули функции.'),eq:'y = '+ts([[a,2],[-a*(p+q),1],[a*p*q,0]]),ans:[p,q],lab:'x',h:[L('Zeros are the x where y = 0.','Нөлдері — y = 0 болатын x мәндері.','Нули — это x, при которых y = 0.')],ex:()=>M('x = '+p+';  x = '+q)}},
+ (lv,r)=>{const a=nz(r,-3,3),m=nz(r,-5,5);let n=nz(r,-6,6);if(n===m)n=-n;const e='y = '+(a===1?'':a===-1?'-':a)+'(x'+sgnS(-m)+')^2'+sgnS(n);const g=a>0?'y ≥ '+n:'y ≤ '+n;
+  return{o:'8.4.1.3',k:'mc',p:L('Find the range of the function.','Функцияның мәндер облысын табыңыз.','Найдите множество значений функции.'),eq:e,opts:[g,a>0?'y ≤ '+n:'y ≥ '+n,a>0?'y ≥ '+m:'y ≤ '+m,'y ∈ ℝ'],a:0,h:[L('The range starts at the y-coordinate of the vertex.','Мәндер облысы төбенің y координатасынан басталады.','Множество значений начинается с ординаты вершины.')],ex:()=>M(g)}});
+
+/* T11 Modelling */
+addGens('t11',
+ (lv,r)=>{if(lv<3){const S2=2*ri(r,3,lv===1?12:30);return{o:'8.4.3.1',k:'num',p:L(`The sum of two numbers is ${S2}. What is the largest possible product?`,`Екі санның қосындысы ${S2}. Олардың көбейтіндісінің ең үлкен мәні қандай?`,`Сумма двух чисел ${S2}. Каково наибольшее произведение?`),ans:S2*S2/4,h:[()=>M('P(x) = x('+S2+' - x)'),L('Find the vertex of P(x).','P(x) төбесін табыңыз.','Найдите вершину P(x).')],ex:()=>M('x = '+S2/2+',  P = '+S2*S2/4)}}
+  const d=2*ri(r,2,10);return{o:'8.4.3.1',k:'num',p:L(`The difference of two numbers is ${d}. What is the smallest possible product?`,`Екі санның айырмасы ${d}. Олардың көбейтіндісінің ең кіші мәні қандай?`,`Разность двух чисел ${d}. Каково наименьшее произведение?`),ans:-d*d/4,h:[()=>M('P(x) = x(x + '+d+')'),L('The minimum is at the vertex.','Ең кіші мән төбеде.','Минимум — в вершине.')],ex:()=>M('x = '+(-d/2)+',  P = '+(-d*d/4))}},
+ (lv,r)=>{const v=5*ri(r,2,6),h0=ri(r,0,lv===1?0:15),t=lv===3?ri(r,1,5)/2:ri(r,1,3);const H=h0+v*t-5*t*t;return{o:'8.4.2.3',k:'num',p:L(`Find the height of the ball after ${raw(t).replace('.',S.lang==='en'?'.':',')} s.`,`${raw(t).replace('.',S.lang==='en'?'.':',')} с өткенде доптың биіктігін табыңыз.`,`Найдите высоту мяча через ${raw(t).replace('.',S.lang==='en'?'.':',')} с.`),eq:'h(t) = '+ts([[-5,2],[v,1],[h0,0]]).replace(/x/g,'t'),ans:H,tol:1e-6,unit:L('Unit: m.','Өлшем бірлігі: м.','Единицы: м.'),h:[L('Substitute t into the formula.','t-ны формулаға қойыңыз.','Подставьте t в формулу.')],ex:()=>M('h('+raw(t)+') = '+raw(H))}});
+
+/* T12 Statistics */
+addGens('t12',
+ (lv,r)=>{const d=Array.from({length:lv===1?6:lv===2?10:14},()=>ri(r,lv===3?100:5,lv===3?190:60));return{o:'8.3.3.4',k:'num',p:L('Find the range of the data (largest − smallest).','Деректердің құлашын табыңыз (ең үлкені − ең кішісі).','Найдите размах данных (наибольшее − наименьшее).'),eq:d.join(', '),ans:Math.max(...d)-Math.min(...d),h:[L('Find the largest and the smallest values.','Ең үлкен және ең кіші мәнді табыңыз.','Найдите наибольшее и наименьшее значения.')],ex:()=>M(Math.max(...d)+' - '+Math.min(...d)+' = '+(Math.max(...d)-Math.min(...d)))}},
+ (lv,r)=>{const k=ri(r,2,9);const add=r()<.5;const x=ri(r,10,40),s=ri(r,2,8);const nx=add?x+k:x*k,ns=add?s:s*k;const L2=(m,sd)=>L(`x̄ = ${m}, σ = ${sd}`,`x̄ = ${m}, σ = ${sd}`,`x̄ = ${m}, σ = ${sd}`);
+  return{o:'8.3.3.5',k:'mc',p:add?L(`The data have x̄ = ${x} and σ = ${s}. Every value is increased by ${k}. What are the new x̄ and σ?`,`Деректердің x̄ = ${x}, σ = ${s}. Әр мән ${k}-ге арттырылды. Жаңа x̄ мен σ қандай?`,`У данных x̄ = ${x}, σ = ${s}. Каждое значение увеличили на ${k}. Каковы новые x̄ и σ?`):L(`The data have x̄ = ${x} and σ = ${s}. Every value is multiplied by ${k}. What are the new x̄ and σ?`,`Деректердің x̄ = ${x}, σ = ${s}. Әр мән ${k}-ге көбейтілді. Жаңа x̄ мен σ қандай?`,`У данных x̄ = ${x}, σ = ${s}. Каждое значение умножили на ${k}. Каковы новые x̄ и σ?`),
+   opts:[L2(nx,ns),L2(nx,add?s+k:s),L2(x,ns===s?s+k:ns),L2(add?x*k:x+k,s*k)].filter((o,i,a)=>a.findIndex(z=>z.en===o.en)===i),a:0,h:[L('Adding a number shifts every value but not the distances between them.','Санды қосу әр мәнді жылжытады, бірақ олардың арақашықтығын өзгертпейді.','Прибавление числа сдвигает значения, но не меняет расстояния между ними.'),L('Multiplying stretches the distances by the same factor.','Көбейту арақашықтықтарды сол есе созады.','Умножение растягивает расстояния во столько же раз.')],ex:()=>M('x̄ = '+nx+',  σ = '+ns)}});
+
+/* T13 Quadratic inequalities */
+addGens('t13',
+ (lv,r)=>{const k=ri(r,1,9),s=pick(r,['>','≥','<','≤']);const set=quadSet(1,0,-k*k,s);return{o:'8.2.2.8',k:'mc',p:L('Solve the inequality.','Теңсіздікті шешіңіз.','Решите неравенство.'),eq:'x^2 '+s+' '+k*k,opts:ivOpts(set,[quadSet(1,0,-k*k,FLIP[s]),quadSet(1,0,-k*k,TOG[s]),setFromPred(x=>CMP[s](SG(x-k)),[k])]),a:0,h:[()=>M('x^2 - '+k*k+' = (x - '+k+')(x + '+k+')')],ex:()=>'x ∈ '+IV(set)}},
+ (lv,r)=>{const p=nz(r,-8,5),q=ri(r,p+2,9);const strict=lv===1||r()<.5;return{o:'8.2.2.8',k:'num',p:L('Find the smallest integer solution.','Ең кіші бүтін шешімін табыңыз.','Найдите наименьшее целое решение.'),eq:ts([[1,2],[-(p+q),1],[p*q,0]])+(strict?' < 0':' ≤ 0'),ans:strict?p+1:p,h:[L('Solve the inequality and look at the left end of the interval.','Теңсіздікті шешіп, аралықтың сол жақ шетіне қараңыз.','Решите неравенство и посмотрите на левый конец промежутка.')],ex:()=>'x ∈ '+IV([{a:p,b:q,ca:!strict,cb:!strict}])}});
+
+/* T14 Rational inequalities */
+addGens('t14',
+ (lv,r)=>{const a=nz(r,-6,6),k=pick(r,[1,2,3,-1,-2,-5]),s=pick(r,['>','<','≥','≤']);const set=setFromPred(x=>Math.abs(x-a)>1e-9&&CMP[s](SG(k/(x-a))),[a]);
+  return{o:'8.2.2.9',k:'mc',p:L('Solve the inequality.','Теңсіздікті шешіңіз.','Решите неравенство.'),eq:'fr{'+k+'}{x'+sgnS(-a)+'} '+s+' 0',opts:ivOpts(set,[setFromPred(x=>CMP[FLIP[s]](SG(k/(x-a)))&&x!==a,[a]),[{a:a,b:Infinity,ca:true}],[{a:-Infinity,b:a,cb:true}]]),a:0,h:[L('A fraction with a constant numerator has the sign of the numerator times the sign of the denominator.','Алымы тұрақты бөлшектің таңбасы алым мен бөлім таңбаларының көбейтіндісіне тең.','Знак дроби с постоянным числителем — произведение знаков числителя и знаменателя.'),L('The fraction is never 0, and x ≠ '+a+'.','Бөлшек ешқашан 0-ге тең емес, ал x ≠ '+a+'.','Дробь никогда не равна 0, а x ≠ '+a+'.')],ex:()=>'x ∈ '+IV(set)}},
+ (lv,r)=>{const a=nz(r,-6,5),b=ri(r,a+1,7),s=pick(r,['>','≥','<','≤']);const set=setFromPred(x=>CMP[s](SG((a-x)*(x-b))),[a,b]);
+  return{o:'8.2.2.9',k:'mc',p:L('Solve the inequality (watch the sign of the leading coefficient).','Теңсіздікті шешіңіз (бас коэффициенттің таңбасына назар аударыңыз).','Решите неравенство (следите за знаком старшего коэффициента).'),eq:'('+a+' - x)(x'+sgnS(-b)+') '+s+' 0',opts:ivOpts(set,[setFromPred(x=>CMP[s](SG((x-a)*(x-b))),[a,b]),setFromPred(x=>CMP[TOG[s]](SG((a-x)*(x-b))),[a,b])]),a:0,h:[L('Write (a − x) as −(x − a) and multiply by −1, reversing the sign.','(a − x)-ті −(x − a) түрінде жазып, −1-ге көбейтіңіз, таңбаны кері ауыстырыңыз.','Запишите (a − x) как −(x − a) и умножьте на −1, поменяв знак.')],ex:()=>'x ∈ '+IV(set)}});
+
+/* T15 Systems */
+addGens('t15',
+ (lv,r)=>{const a=ri(r,-5,3),b=ri(r,a+1,7),p=ri(r,2,5),q=ri(r,2,4);const s1=pick(r,['>','≥']),s2=pick(r,['<','≤']);const A=setFromPred(x=>CMP[s1](SG(x-a)),[a]),B=setFromPred(x=>CMP[s2](SG(x-b)),[b]),R=combine(A,B,'and');
+  return{o:'8.2.2.10',k:'mc',p:L('Solve the system.','Жүйені шешіңіз.','Решите систему.'),eq:'{ '+p+'x'+sgnS(-p*a)+' '+s1+' 0;  '+q+'x '+s2+' '+q*b+' }',opts:ivOpts(R,[combine(A,B,'or'),[{a:p*a,b:q*b,ca:true,cb:true}],[{a,b,ca:true,cb:true}]]),a:0,h:[L('Solve each inequality: divide by the positive coefficient.','Әр теңсіздікті шешіңіз: оң коэффициентке бөліңіз.','Решите каждое неравенство: разделите на положительный коэффициент.')],ex:()=>M('x '+s1+' '+a+',  x '+s2+' '+b)+' ⇒ x ∈ '+IV(R)}},
+ (lv,r)=>{const k=ri(r,3,8),m=ri(r,1,k-1);return{o:'8.2.2.11',k:'num',p:L('How many integers satisfy the system?','Жүйені неше бүтін сан қанағаттандырады?','Сколько целых чисел удовлетворяют системе?'),eq:'{ x^2 ≤ '+k*k+';  x^2 ≥ '+m*m+' }',ans:2*(k-m+1),h:[()=>M('-'+k+' ≤ x ≤ '+k),()=>M('x ≤ -'+m+'  or  x ≥ '+m)],ex:()=>'x ∈ '+IV([{a:-k,b:-m,ca:true,cb:true},{a:m,b:k,ca:true,cb:true}])+' → '+2*(k-m+1)}});
